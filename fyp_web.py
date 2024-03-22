@@ -69,11 +69,15 @@ def modify_image(image, t1, t2, option, draw_bbox = False, bounding_box = ((0,0)
 
         return modified_image
     
+# def draw_bounding_box(image, bounding_box):
+#     drawn_image = image.copy()
+#     cv2.rectangle(drawn_image, tuple(bounding_box[0]), tuple(bounding_box[1]), (255, 255, 0), 2)
+#     return drawn_image
+
 def draw_bounding_box(image, bounding_box):
     drawn_image = image.copy()
-    cv2.rectangle(drawn_image, tuple(bounding_box[0]), tuple(bounding_box[1]), (255, 255, 0), 2)
+    cv2.rectangle(drawn_image, tuple(bounding_box[0]), tuple(bounding_box[1]), (0, 0, 255), 2)  # Red color (BGR format)
     return drawn_image
-
 
 def download_image(image):
     pil_image = Image.fromarray(image)
