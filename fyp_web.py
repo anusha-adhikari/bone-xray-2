@@ -13,7 +13,7 @@ def load_req_model(m):
     if m == 1:
         model_url = "vgg19_canny1.h5"
     if m == 2:
-        model_url = "vgg19_morph.h5"
+        model_url = "vgg19_morph1.h5"
     # response = requests.get(model_url)
     # model_file = BytesIO(response.content)
     model = load_model(model_url)
