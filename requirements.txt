@@ -1,0 +1,7 @@
+numpy==1.23.0
+opencv-python
+Pillow==9.4.0
+streamlit
+streamlit_image_zoom==0.0.1
+keras
+tensorflow
