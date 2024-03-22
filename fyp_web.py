@@ -52,9 +52,9 @@ def modify_image(image, t1, t2, option, draw_bbox = False, bounding_box = ((0,0)
         enhanced_image = adjust_brightness_contrast(gradient, t1, t2)
 
         enhanced_image = np.array(enhanced_image)
-        if len(enhanced_image.shape) > 2:  # Check if the image has multiple channels
-            enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2GRAY)
-        # enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2GRAY)
+        # if len(enhanced_image.shape) > 2:  # Check if the image has multiple channels
+        #     # enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2GRAY)
+        #     # enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2GRAY)
 
         if draw_bbox:
             enhanced_image = draw_bounding_box(enhanced_image, bounding_box)
