@@ -4,8 +4,6 @@ import cv2
 import numpy as np
 import base64
 from streamlit_image_zoom import image_zoom  # Import the image_zoom function
-# import requests
-# from io import BytesIO
 from keras.models import load_model
 from torch import nn
 import torch.nn.functional as F
@@ -42,12 +40,6 @@ def tensor_to_np_img(img_tensor):
     img = img_tensor.cpu().permute(0, 2, 3, 1).numpy()
     return img[0, ...]  # get the first element since it's batch form
 
-# def sobel_torch_version(img_np, torch_sobel):
-#     img_tensor = np_img_to_tensor(np.float32(img_np))
-#     img_edged = tensor_to_np_img(torch_sobel(img_tensor))
-#     img_edged = np.squeeze(img_edged)
-#     return img_edged
-
 def sobel_torch_version(img_np, torch_sobel):
     img_tensor = np_img_to_tensor(np.float32(img_np))
     
@@ -64,7 +56,6 @@ def sob(rgb_orig, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
     if len(rgb_orig.shape) > 2:
             rgb_orig = cv2.cvtColor(rgb_orig, cv2.COLOR_BGR2GRAY)
     torch_sobel = Sobel()
-    # rgb_orig = cv2.resize(rgb_orig, (224, 224))
     
     rgb_edged = sobel_torch_version(rgb_orig, torch_sobel=torch_sobel)
     
@@ -73,11 +64,6 @@ def sob(rgb_orig, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
     
     rgb_edged_cv2 = np.sqrt(np.square(rgb_edged_cv2_x), np.square(rgb_edged_cv2_y))
     
-    # rgb_orig = cv2.resize(rgb_orig, (222, 222))
-    # rgb_edged_cv2 = cv2.resize(rgb_edged_cv2, (222, 222))
-    # rgb_both = np.concatenate(
-        # [rgb_orig / 255, rgb_edged / np.max(rgb_edged), rgb_edged_cv2 / np.max(rgb_edged_cv2)], axis=1)
-    # mod = (rgb_edged / np.max(rgb_edged))
     mod = rgb_edged_cv2 / np.max(rgb_edged_cv2)
     mod = (mod * 255).astype(np.uint8)
     if draw_bbox:
@@ -85,38 +71,13 @@ def sob(rgb_orig, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
 
     return mod
 
-# def sob(rgb_orig):
-#     torch_sobel = Sobel()
-    
-#     # Get the original dimensions of the image
-#     original_height, original_width = rgb_orig.shape[:2]
-    
-#     # Determine the target size while preserving aspect ratio
-#     target_size = (224, 224)
-#     if original_height > original_width:
-#         new_height = target_size[0]
-#         new_width = int(original_width * (new_height / original_height))
-#     else:
-#         new_width = target_size[1]
-#         new_height = int(original_height * (new_width / original_width))
-    
-#     # Resize the image
-#     rgb_orig = cv2.resize(rgb_orig, (new_width, new_height))
-    
-#     # Apply Sobel filter
-#     rgb_edged = sobel_torch_version(rgb_orig, torch_sobel=torch_sobel)
-    
-#     return rgb_edged / np.max(rgb_edged)
-
-
 @st.cache(allow_output_mutation=True)
 def load_req_model(m):
     if m == 1:
         model_url = "vgg19_canny1.h5"
     if m == 2:
         model_url = "vgg19_morph1.h5"
-    # response = requests.get(model_url)
-    # model_file = BytesIO(response.content)
+        
     model = load_model(model_url)
     return model
 
@@ -201,14 +162,15 @@ def main():
     st.title("Image :blue[Uploader], :blue[Modifier], and :blue[Downloader]")
 
     st.caption('1. Upload an X-Ray image of bones in the sidebar.')
-    st.caption('2. Choose whether edge detection is required.')
-    st.caption('3. Edge detection : Adjust the two threshold values to obtain a clear outline.')
-    st.caption('4. No edge detection : Adjust the contrast and brightness values to obtain a clear outline.')
-    st.caption('5. Zoom factor : Adjust the value so that hovering over the modified image, zooms that part of the image (1.00 - no zoom; 5.00 - max zoom).')
-    st.caption('6. Bounding box can be made to appear by clicking the checkbox.')
-    st.caption('7. Adjust the X1 & X2 -> horizontal adjustment, and Y1 & Y2 -> vertical adjustments in the placement of the bounding box on the desired location of the modified image.')
-    st.caption('8. Processing the bounding box gives the extracted region from inside the bounding box and classifies if the area in the bounding box has a fracture or not!')
-    st.caption('9. Modified image can be downloaded with/ without bounding box depending upon need.')
+    st.caption('2. Choose preferred type of edge detection')
+    st.caption('3. Canny Edge detection : Adjust the two threshold values to obtain a clear outline.')
+    st.caption('4. Morphological Edge detection : Adjust the contrast and brightness values to obtain a clear outline.')
+    st.caption('5. Sobel Edge detection : No adjustment required to obtain a clear outline.')
+    st.caption('6. Zoom factor : Adjust the value so that hovering over the modified image, zooms that part of the image (1.00 - no zoom; 5.00 - max zoom).')
+    st.caption('7. Bounding box can be made to appear by clicking the checkbox.')
+    st.caption('8. Adjust the X1 & X2 -> horizontal adjustment, and Y1 & Y2 -> vertical adjustments in the placement of the bounding box on the desired location of the modified image.')
+    st.caption('9. Processing the bounding box gives the extracted region from inside the bounding box and classifies if the area in the bounding box has a fracture or not!')
+    st.caption('10. Modified image can be downloaded with/ without bounding box depending upon need.')
 
     col1, col2 = st.columns(2)
 
