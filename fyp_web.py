@@ -7,6 +7,64 @@ from streamlit_image_zoom import image_zoom  # Import the image_zoom function
 # import requests
 # from io import BytesIO
 from keras.models import load_model
+from torch import nn
+import torch
+
+
+class Sobel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.filter = nn.Conv2d(in_channels=1, out_channels=2, kernel_size=3, stride=1, padding=0, bias=False)
+
+        Gx = torch.tensor([[2.0, 0.0, -2.0], [4.0, 0.0, -4.0], [2.0, 0.0, -2.0]])
+        Gy = torch.tensor([[2.0, 4.0, 2.0], [0.0, 0.0, 0.0], [-2.0, -4.0, -2.0]])
+        G = torch.cat([Gx.unsqueeze(0), Gy.unsqueeze(0)], 0)
+        G = G.unsqueeze(1)
+        self.filter.weight = nn.Parameter(G, requires_grad=False)
+
+    def forward(self, img):
+        x = self.filter(img)
+        x = torch.mul(x, x)
+        x = torch.sum(x, dim=1, keepdim=True)
+        x = torch.sqrt(x)
+        return x
+    
+def np_img_to_tensor(img):
+    if len(img.shape) == 2:
+        img = img[..., np.newaxis]
+    img_tensor = torch.from_numpy(img)
+    img_tensor = img_tensor.permute(2, 0, 1)
+    img_tensor = torch.unsqueeze(img_tensor, 0)
+    return img_tensor
+
+def tensor_to_np_img(img_tensor):
+    img = img_tensor.cpu().permute(0, 2, 3, 1).numpy()
+    return img[0, ...]  # get the first element since it's batch form
+
+def sobel_torch_version(img_np, torch_sobel):
+    img_tensor = np_img_to_tensor(np.float32(img_np))
+    img_edged = tensor_to_np_img(torch_sobel(img_tensor))
+    img_edged = np.squeeze(img_edged)
+    return img_edged
+
+def sob(rgb_orig):
+    torch_sobel = Sobel()
+    # rgb_orig = cv2.resize(rgb_orig, (224, 224))
+    
+    rgb_edged = sobel_torch_version(rgb_orig, torch_sobel=torch_sobel)
+    
+    # rgb_edged_cv2_x = cv2.Sobel(rgb_orig, cv2.CV_64F, 1, 0, ksize=3)
+    # rgb_edged_cv2_y = cv2.Sobel(rgb_orig, cv2.CV_64F, 0, 1, ksize=3)
+    
+    # rgb_edged_cv2 = np.sqrt(np.square(rgb_edged_cv2_x), np.square(rgb_edged_cv2_y))
+    
+    # rgb_orig = cv2.resize(rgb_orig, (222, 222))
+    # rgb_edged_cv2 = cv2.resize(rgb_edged_cv2, (222, 222))
+    # rgb_both = np.concatenate(
+        # [rgb_orig / 255, rgb_edged / np.max(rgb_edged), rgb_edged_cv2 / np.max(rgb_edged_cv2)], axis=1)
+
+    return rgb_edged / np.max(rgb_edged)
+
 
 @st.cache(allow_output_mutation=True)
 def load_req_model(m):
@@ -40,7 +98,7 @@ def adjust_brightness_contrast(image, alpha, beta):
     return cv2.addWeighted(image, alpha, image, 0, beta)
 
 def modify_image(image, t1, t2, option, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
-    if option == "No":
+    if option == "Morphological":
         enhanced_contrast = adjust_contrast(image, 1.5)
         enhanced_contrast = np.array(enhanced_contrast)
 
@@ -54,14 +112,14 @@ def modify_image(image, t1, t2, option, draw_bbox = False, bounding_box = ((0,0)
         enhanced_image = np.array(enhanced_image)
         if len(enhanced_image.shape) > 2:  # Check if the image has multiple channels
             enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2GRAY)
-            # enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2GRAY)
+        # enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2GRAY)
 
         if draw_bbox:
             enhanced_image = draw_bounding_box(enhanced_image, bounding_box)
 
         return enhanced_image
 
-    if option == "Yes":
+    if option == "Canny Edge":
         image = np.array(image)
         modified_image = morphological_processing_with_canny(image, t1, t2)
         if draw_bbox:
@@ -69,10 +127,19 @@ def modify_image(image, t1, t2, option, draw_bbox = False, bounding_box = ((0,0)
 
         return modified_image
     
+    if option == "Sobel":
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        mod = sob(image)
+        if draw_bbox:
+            mod = draw_bounding_box(mod, bounding_box)
+
+        return mod
+    
 def draw_bounding_box(image, bounding_box):
     drawn_image = image.copy()
     cv2.rectangle(drawn_image, tuple(bounding_box[0]), tuple(bounding_box[1]), (255, 255, 0), 2)
     return drawn_image
+
 
 def download_image(image):
     pil_image = Image.fromarray(image)
@@ -116,21 +183,21 @@ def main():
     uploaded_file = st.sidebar.file_uploader("Choose an image...", type=["jpg", "jpeg", "png", "JPG", "JPEG"])
 
     option = st.sidebar.selectbox(
-        "Would you like to use edge detection?",
-        ("Choose either Yes or No", "Yes", "No"),
+        "Choose:",
+        ("Edge Detection type", "Canny Edge", "Morphological", "Sobel"),
         index=0
     )
 
-    if option is not None and option == "Choose either Yes or No":
+    if option is not None and option == "Edge Detection type":
         st.write("Please choose a valid option - :blue[Yes] or :blue[No]")
         st.stop()
 
     st.sidebar.subheader("Parameters")
-    if option == "No":
+    if option == "Morphological":
         threshold = st.sidebar.slider("Contrast increase by : ", min_value=0, max_value=100, value=40)
         threshold2 = st.sidebar.slider("Brightness increase by adding : ", min_value=0, max_value=100, value=5)
 
-    if option == "Yes":
+    if option == "Canny Edge":
         threshold = st.sidebar.slider("Threshold 1 : ", min_value=0, max_value=200, value=12)
         threshold2 = st.sidebar.slider("Threshold 2 : ", min_value=0, max_value=400, value=76)
 
@@ -181,7 +248,7 @@ def main():
                             # Display the extracted region
                         st.sidebar.image(region_of_interest, caption="Extracted Region",
                                                 use_column_width=True)
-                        if option == "Yes":
+                        if option == "Canny Edge":
 
                             # model = load_req_model('https://github.com/anusha-adhikari/Preprocessing_frac_image/raw/main/vgg19.h5')
                             model = load_req_model(1)
@@ -196,7 +263,7 @@ def main():
                             else:
                                 st.success('No fracture detected')
 
-                        if option == "No":
+                        if option == "Morphological":
 
                             # model = load_req_model('https://github.com/anusha-adhikari/Preprocessing_frac_image/raw/main/vgg19_morph.h5')
 
