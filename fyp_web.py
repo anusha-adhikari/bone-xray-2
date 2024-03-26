@@ -44,25 +44,48 @@ def tensor_to_np_img(img_tensor):
 def sobel_torch_version(img_np, torch_sobel):
     img_tensor = np_img_to_tensor(np.float32(img_np))
     img_edged = tensor_to_np_img(torch_sobel(img_tensor))
-    img_edged = np.squeeze(img_edged)
+    # img_edged = np.squeeze(img_edged)
     return img_edged
+
+# def sob(rgb_orig):
+#     torch_sobel = Sobel()
+#     rgb_orig = cv2.resize(rgb_orig, (224, 224))
+    
+#     rgb_edged = sobel_torch_version(rgb_orig, torch_sobel=torch_sobel)
+    
+#     # rgb_edged_cv2_x = cv2.Sobel(rgb_orig, cv2.CV_64F, 1, 0, ksize=3)
+#     # rgb_edged_cv2_y = cv2.Sobel(rgb_orig, cv2.CV_64F, 0, 1, ksize=3)
+    
+#     # rgb_edged_cv2 = np.sqrt(np.square(rgb_edged_cv2_x), np.square(rgb_edged_cv2_y))
+    
+#     # rgb_orig = cv2.resize(rgb_orig, (222, 222))
+#     # rgb_edged_cv2 = cv2.resize(rgb_edged_cv2, (222, 222))
+#     # rgb_both = np.concatenate(
+#         # [rgb_orig / 255, rgb_edged / np.max(rgb_edged), rgb_edged_cv2 / np.max(rgb_edged_cv2)], axis=1)
+
+#     return rgb_edged / np.max(rgb_edged)
 
 def sob(rgb_orig):
     torch_sobel = Sobel()
-    # rgb_orig = cv2.resize(rgb_orig, (224, 224))
     
+    # Get the original dimensions of the image
+    original_height, original_width = rgb_orig.shape[:2]
+    
+    # Determine the target size while preserving aspect ratio
+    target_size = (224, 224)
+    if original_height > original_width:
+        new_height = target_size[0]
+        new_width = int(original_width * (new_height / original_height))
+    else:
+        new_width = target_size[1]
+        new_height = int(original_height * (new_width / original_width))
+    
+    # Resize the image
+    rgb_orig = cv2.resize(rgb_orig, (new_width, new_height))
+    
+    # Apply Sobel filter
     rgb_edged = sobel_torch_version(rgb_orig, torch_sobel=torch_sobel)
     
-    # rgb_edged_cv2_x = cv2.Sobel(rgb_orig, cv2.CV_64F, 1, 0, ksize=3)
-    # rgb_edged_cv2_y = cv2.Sobel(rgb_orig, cv2.CV_64F, 0, 1, ksize=3)
-    
-    # rgb_edged_cv2 = np.sqrt(np.square(rgb_edged_cv2_x), np.square(rgb_edged_cv2_y))
-    
-    # rgb_orig = cv2.resize(rgb_orig, (222, 222))
-    # rgb_edged_cv2 = cv2.resize(rgb_edged_cv2, (222, 222))
-    # rgb_both = np.concatenate(
-        # [rgb_orig / 255, rgb_edged / np.max(rgb_edged), rgb_edged_cv2 / np.max(rgb_edged_cv2)], axis=1)
-
     return rgb_edged / np.max(rgb_edged)
 
 
