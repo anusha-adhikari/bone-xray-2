@@ -50,7 +50,7 @@ def sobel_torch_version(img_np, torch_sobel):
 def sob(rgb_orig, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
     rgb_orig = np.array(rgb_orig)
     if len(rgb_orig.shape) > 2:
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            rgb_orig = cv2.cvtColor(rgb_orig, cv2.COLOR_BGR2GRAY)
     torch_sobel = Sobel()
     # rgb_orig = cv2.resize(rgb_orig, (224, 224))
     
