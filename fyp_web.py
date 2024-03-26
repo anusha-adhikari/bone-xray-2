@@ -8,6 +8,7 @@ from streamlit_image_zoom import image_zoom  # Import the image_zoom function
 # from io import BytesIO
 from keras.models import load_model
 from torch import nn
+import torch.nn.functional as F
 import torch
 
 
