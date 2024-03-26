@@ -79,6 +79,7 @@ def sob(rgb_orig, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
         # [rgb_orig / 255, rgb_edged / np.max(rgb_edged), rgb_edged_cv2 / np.max(rgb_edged_cv2)], axis=1)
     # mod = (rgb_edged / np.max(rgb_edged))
     mod = rgb_edged_cv2 / np.max(rgb_edged_cv2)
+    mod = (mod * 255).astype(np.uint8)
     if draw_bbox:
         mod = draw_bounding_box(mod, bounding_box)
 
@@ -264,13 +265,13 @@ def main():
                         modified_image = modify_image(image, threshold, threshold2, option, draw_bbox, bounding_box)
                     else:
                         modified_image = sob(image, draw_bbox, bounding_box)
-                        st.image(modified_image, caption="Uploaded Image", use_column_width=True)
+                        # st.image(modified_image, caption="Uploaded Image", use_column_width=True)
                 else:
                     if option != "Sobel":
                         modified_image = modify_image(image, threshold, threshold2, option)
                     else:
                         modified_image = sob(image)
-                        st.image(modified_image, caption="Uploaded Image", use_column_width=True)
+                        # st.image(modified_image, caption="Uploaded Image", use_column_width=True)
 
                 # Use the image_zoom function to display the modified image with zoom functionality
                 image_zoom(modified_image, mode="mousemove", size=512, zoom_factor=zoom_factor)
