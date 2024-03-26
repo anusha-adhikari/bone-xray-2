@@ -56,16 +56,17 @@ def sob(rgb_orig, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
     
     rgb_edged = sobel_torch_version(rgb_orig, torch_sobel=torch_sobel)
     
-    # rgb_edged_cv2_x = cv2.Sobel(rgb_orig, cv2.CV_64F, 1, 0, ksize=3)
-    # rgb_edged_cv2_y = cv2.Sobel(rgb_orig, cv2.CV_64F, 0, 1, ksize=3)
+    rgb_edged_cv2_x = cv2.Sobel(rgb_orig, cv2.CV_64F, 1, 0, ksize=3)
+    rgb_edged_cv2_y = cv2.Sobel(rgb_orig, cv2.CV_64F, 0, 1, ksize=3)
     
-    # rgb_edged_cv2 = np.sqrt(np.square(rgb_edged_cv2_x), np.square(rgb_edged_cv2_y))
+    rgb_edged_cv2 = np.sqrt(np.square(rgb_edged_cv2_x), np.square(rgb_edged_cv2_y))
     
     # rgb_orig = cv2.resize(rgb_orig, (222, 222))
     # rgb_edged_cv2 = cv2.resize(rgb_edged_cv2, (222, 222))
     # rgb_both = np.concatenate(
         # [rgb_orig / 255, rgb_edged / np.max(rgb_edged), rgb_edged_cv2 / np.max(rgb_edged_cv2)], axis=1)
-    mod = (rgb_edged / np.max(rgb_edged))
+    # mod = (rgb_edged / np.max(rgb_edged))
+    mod = rgb_edged_cv2 / np.max(rgb_edged_cv2)
     if draw_bbox:
         mod = draw_bounding_box(mod, bounding_box)
 
