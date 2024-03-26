@@ -97,7 +97,7 @@ def adjust_contrast(image, factor):
 def adjust_brightness_contrast(image, alpha, beta):
     return cv2.addWeighted(image, alpha, image, 0, beta)
 
-def modify_image(image, t1, t2, option, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
+def modify_image(image, t1 = 0, t2 = 0, option, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
     if option == "Morphological":
         enhanced_contrast = adjust_contrast(image, 1.5)
         enhanced_contrast = np.array(enhanced_contrast)
