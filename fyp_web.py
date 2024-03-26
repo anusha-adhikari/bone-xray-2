@@ -264,11 +264,13 @@ def main():
                         modified_image = modify_image(image, threshold, threshold2, option, draw_bbox, bounding_box)
                     else:
                         modified_image = sob(image, draw_bbox, bounding_box)
+                        st.image(modified_image, caption="Uploaded Image", use_column_width=True)
                 else:
                     if option != "Sobel":
                         modified_image = modify_image(image, threshold, threshold2, option)
                     else:
                         modified_image = sob(image)
+                        st.image(modified_image, caption="Uploaded Image", use_column_width=True)
 
                 # Use the image_zoom function to display the modified image with zoom functionality
                 image_zoom(modified_image, mode="mousemove", size=512, zoom_factor=zoom_factor)
