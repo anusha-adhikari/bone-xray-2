@@ -47,9 +47,12 @@ def sobel_torch_version(img_np, torch_sobel):
     img_edged = np.squeeze(img_edged)
     return img_edged
 
-def sob(rgb_orig):
+def sob(rgb_orig, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
+    rgb_orig = np.array(rgb_orig)
+    if len(rgb_orig.shape) > 2:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     torch_sobel = Sobel()
-    rgb_orig = cv2.resize(rgb_orig, (224, 224))
+    # rgb_orig = cv2.resize(rgb_orig, (224, 224))
     
     rgb_edged = sobel_torch_version(rgb_orig, torch_sobel=torch_sobel)
     
@@ -62,8 +65,11 @@ def sob(rgb_orig):
     # rgb_edged_cv2 = cv2.resize(rgb_edged_cv2, (222, 222))
     # rgb_both = np.concatenate(
         # [rgb_orig / 255, rgb_edged / np.max(rgb_edged), rgb_edged_cv2 / np.max(rgb_edged_cv2)], axis=1)
+    mod = (rgb_edged / np.max(rgb_edged))
+    if draw_bbox:
+        mod = draw_bounding_box(mod, bounding_box)
 
-    return (rgb_edged / np.max(rgb_edged))
+    return mod
 
 # def sob(rgb_orig):
 #     torch_sobel = Sobel()
@@ -150,16 +156,6 @@ def modify_image(image, t1, t2, option, draw_bbox = False, bounding_box = ((0,0)
 
         return modified_image
     
-    if option == "Sobel":
-        image = np.array(image)
-        if len(image.shape) > 2:
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        mod = sob(image)
-        if draw_bbox:
-            mod = draw_bounding_box(mod, bounding_box)
-
-        return mod
-    
 def draw_bounding_box(image, bounding_box):
     drawn_image = image.copy()
     cv2.rectangle(drawn_image, tuple(bounding_box[0]), tuple(bounding_box[1]), (255, 255, 0), 2)
@@ -226,10 +222,6 @@ def main():
         threshold = st.sidebar.slider("Threshold 1 : ", min_value=0, max_value=200, value=12)
         threshold2 = st.sidebar.slider("Threshold 2 : ", min_value=0, max_value=400, value=76)
 
-    if option == "Sobel":
-        threshold = 0
-        threshold2 = 0
-
     zoom_factor = st.sidebar.slider("Zoom Factor : ", min_value=1.0, max_value=5.0, value=2.0)
 
     # Initialize draw_bbox with default value
@@ -255,9 +247,15 @@ def main():
             if uploaded_file is not None:
                 # Modify and display the image
                 if draw_bbox == True:
-                    modified_image = modify_image(image, threshold, threshold2, option, draw_bbox, bounding_box)
+                    if option != "Sobel":
+                        modified_image = modify_image(image, threshold, threshold2, option, draw_bbox, bounding_box)
+                    else:
+                        modified_image = sob(image, draw_bbox, bounding_box)
                 else:
-                    modified_image = modify_image(image, threshold, threshold2, option)
+                    if option != "Sobel":
+                        modified_image = modify_image(image, threshold, threshold2, option)
+                    else:
+                        modified_image = sob(image)
 
                 # Use the image_zoom function to display the modified image with zoom functionality
                 image_zoom(modified_image, mode="mousemove", size=512, zoom_factor=zoom_factor)
