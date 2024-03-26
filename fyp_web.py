@@ -51,7 +51,7 @@ def sobel_torch_version(img_np, torch_sobel):
     img_edged = np.squeeze(img_edged)
     return img_edged
 
-def sob(rgb_orig, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
+def sob(rgb_orig, stype, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
     rgb_orig = np.array(rgb_orig)
     if len(rgb_orig.shape) > 2:
             rgb_orig = cv2.cvtColor(rgb_orig, cv2.COLOR_BGR2GRAY)
@@ -63,8 +63,13 @@ def sob(rgb_orig, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
     rgb_edged_cv2_y = cv2.Sobel(rgb_orig, cv2.CV_64F, 0, 1, ksize=3)
     
     rgb_edged_cv2 = np.sqrt(np.square(rgb_edged_cv2_x), np.square(rgb_edged_cv2_y))
-    
-    mod = rgb_edged_cv2 / np.max(rgb_edged_cv2)
+    if stype == "Type 1":
+        mod = rgb_edged_cv2 / np.max(rgb_edged_cv2)
+    if stype == "Type 2":
+        mod = rgb_edged / np.max(rgb_edged)
+    if stype == "Desired Type":
+        st.write("Please choose a valid option - :blue[Type 1] or :blue[Type 2]")
+        st.stop()
     mod = (mod * 255).astype(np.uint8)
     if draw_bbox:
         mod = draw_bounding_box(mod, bounding_box)
@@ -181,7 +186,7 @@ def main():
 
     option = st.sidebar.selectbox(
         "Choose:",
-        ("Edge Detection type", "Canny Edge", "Morphological", "Sobel"),
+        ("Edge Detection type", "Canny Edge", "Sobel", "Morphological"),
         index=0
     )
 
@@ -197,6 +202,13 @@ def main():
     if option == "Canny Edge":
         threshold = st.sidebar.slider("Threshold 1 : ", min_value=0, max_value=200, value=12)
         threshold2 = st.sidebar.slider("Threshold 2 : ", min_value=0, max_value=400, value=76)
+
+    if option == "Sobel":
+        stype = st.sidebar.selectbox(
+        "Choose:",
+        ("Desired Type", "Type 1", "Type 2"),
+        index=0
+    )
 
     zoom_factor = st.sidebar.slider("Zoom Factor : ", min_value=1.0, max_value=5.0, value=2.0)
 
@@ -226,13 +238,13 @@ def main():
                     if option != "Sobel":
                         modified_image = modify_image(image, threshold, threshold2, option, draw_bbox, bounding_box)
                     else:
-                        modified_image = sob(image, draw_bbox, bounding_box)
+                        modified_image = sob(image, stype, draw_bbox, bounding_box)
                         # st.image(modified_image, caption="Uploaded Image", use_column_width=True)
                 else:
                     if option != "Sobel":
                         modified_image = modify_image(image, threshold, threshold2, option)
                     else:
-                        modified_image = sob(image)
+                        modified_image = sob(image, stype)
                         # st.image(modified_image, caption="Uploaded Image", use_column_width=True)
 
                 # Use the image_zoom function to display the modified image with zoom functionality
