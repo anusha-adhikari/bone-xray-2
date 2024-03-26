@@ -97,7 +97,7 @@ def adjust_contrast(image, factor):
 def adjust_brightness_contrast(image, alpha, beta):
     return cv2.addWeighted(image, alpha, image, 0, beta)
 
-def modify_image(image, t1 = 0, t2 = 0, option, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
+def modify_image(image, option, t1 = 0, t2 = 0, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
     if option == "Morphological":
         enhanced_contrast = adjust_contrast(image, 1.5)
         enhanced_contrast = np.array(enhanced_contrast)
@@ -226,9 +226,9 @@ def main():
             if uploaded_file is not None:
                 # Modify and display the image
                 if draw_bbox == True:
-                    modified_image = modify_image(image, threshold, threshold2, option, draw_bbox, bounding_box)
+                    modified_image = modify_image(image, option, threshold, threshold2, draw_bbox, bounding_box)
                 else:
-                    modified_image = modify_image(image, threshold, threshold2, option)
+                    modified_image = modify_image(image, option, threshold, threshold2)
 
                 # Use the image_zoom function to display the modified image with zoom functionality
                 image_zoom(modified_image, mode="mousemove", size=512, zoom_factor=zoom_factor)
