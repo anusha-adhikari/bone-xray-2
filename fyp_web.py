@@ -128,6 +128,7 @@ def modify_image(image, t1, t2, option, draw_bbox = False, bounding_box = ((0,0)
         return modified_image
     
     if option == "Sobel":
+        image = np.array(image)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         mod = sob(image)
         if draw_bbox:
