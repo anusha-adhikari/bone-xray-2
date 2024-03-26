@@ -68,7 +68,7 @@ def sob(rgb_orig, stype, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
     if stype == "Type 2":
         mod = rgb_edged / np.max(rgb_edged)
     if stype == "Desired Type":
-        st.write("Please choose a valid option - :blue[Type 1] or :blue[Type 2]")
+        st.write("     Please choose a valid option - :blue[Type 1] or :blue[Type 2]")
         st.stop()
     mod = (mod * 255).astype(np.uint8)
     if draw_bbox:
