@@ -5,3 +5,4 @@ streamlit
 streamlit_image_zoom==0.0.1
 keras
 tensorflow
+torch==2.2.1
