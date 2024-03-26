@@ -63,7 +63,7 @@ def sob(rgb_orig):
     # rgb_both = np.concatenate(
         # [rgb_orig / 255, rgb_edged / np.max(rgb_edged), rgb_edged_cv2 / np.max(rgb_edged_cv2)], axis=1)
 
-    return rgb_edged / np.max(rgb_edged)
+    return (rgb_edged / np.max(rgb_edged))
 
 # def sob(rgb_orig):
 #     torch_sobel = Sobel()
