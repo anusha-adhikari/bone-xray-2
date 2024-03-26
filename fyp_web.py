@@ -41,8 +41,19 @@ def tensor_to_np_img(img_tensor):
     img = img_tensor.cpu().permute(0, 2, 3, 1).numpy()
     return img[0, ...]  # get the first element since it's batch form
 
+# def sobel_torch_version(img_np, torch_sobel):
+#     img_tensor = np_img_to_tensor(np.float32(img_np))
+#     img_edged = tensor_to_np_img(torch_sobel(img_tensor))
+#     img_edged = np.squeeze(img_edged)
+#     return img_edged
+
 def sobel_torch_version(img_np, torch_sobel):
     img_tensor = np_img_to_tensor(np.float32(img_np))
+    
+    # Calculate padding to match output size with input size
+    padding = (1, 1, 1, 1)  # Add 1 pixel padding to each side
+    img_tensor = F.pad(img_tensor, padding)
+    
     img_edged = tensor_to_np_img(torch_sobel(img_tensor))
     img_edged = np.squeeze(img_edged)
     return img_edged
