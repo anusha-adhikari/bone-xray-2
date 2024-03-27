@@ -295,6 +295,22 @@ def main():
                                 st.error('Fracture detected')
                             else:
                                 st.success('No fracture detected')
+
+                        if option == "Sobel":
+
+                            # model = load_req_model('https://github.com/anusha-adhikari/Preprocessing_frac_image/raw/main/vgg19_morph.h5')
+
+                            model = load_req_model(2)
+
+                            img = cv2.cvtColor(region_of_interest, cv2.COLOR_GRAY2RGB)
+                            img = cv2.resize(img, (100, 100))
+                            img = img/255
+                            img = np.reshape(img, ((1,)+img.shape))
+
+                            if model.predict(img) >= 0.5:
+                                st.error('Fracture detected')
+                            else:
+                                st.success('No fracture detected')
                             
                         # Display the modified image with drawn bounding boxes
                         st.sidebar.image(modified_image, caption="Modified Image", use_column_width=True)
