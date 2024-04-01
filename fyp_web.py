@@ -3,7 +3,7 @@ from PIL import Image, ImageEnhance
 import cv2
 import numpy as np
 import base64
-from streamlit_image_zoom import image_zoom  # Import the image_zoom function
+from streamlit_image_zoom import image_zoom  
 from keras.models import load_model
 from torch import nn
 import torch.nn.functional as F
@@ -47,13 +47,13 @@ def np_img_to_tensor(img):
 
 def tensor_to_np_img(img_tensor):
     img = img_tensor.cpu().permute(0, 2, 3, 1).numpy()
-    return img[0, ...]  # get the first element since it's batch form
+    return img[0, ...]  
 
 def sobel_torch_version(img_np, torch_sobel):
     img_tensor = np_img_to_tensor(np.float32(img_np))
     
-    # Calculate padding to match output size with input size
-    padding = (1, 1, 1, 1)  # Add 1 pixel padding to each side
+    
+    padding = (1, 1, 1, 1)  
     img_tensor = F.pad(img_tensor, padding)
     
     img_edged = tensor_to_np_img(torch_sobel(img_tensor))
@@ -118,10 +118,9 @@ def modify_image(image, t1, t2, option, draw_bbox = False, bounding_box = ((0,0)
         enhanced_image = adjust_brightness_contrast(gradient, t1, t2)
 
         enhanced_image = np.array(enhanced_image)
-        if len(enhanced_image.shape) > 2:  # Check if the image has multiple channels
+        if len(enhanced_image.shape) > 2:  
             enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2GRAY)
-        # enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2GRAY)
-
+        
         if draw_bbox:
             enhanced_image = draw_bounding_box(enhanced_image, bounding_box)
 
@@ -178,9 +177,6 @@ def main():
 
     col1, col2 = st.columns(2)
 
-    # with st.sidebar:
-    #     st.image("logo-1.png", width=180)
-
     uploaded_file = st.sidebar.file_uploader("Choose an image...", type=["jpg", "jpeg", "png", "JPG", "JPEG"])
 
     option = st.sidebar.selectbox(
@@ -211,7 +207,7 @@ def main():
 
     zoom_factor = st.sidebar.slider("Zoom Factor : ", min_value=1.0, max_value=5.0, value=2.0)
 
-    # Initialize draw_bbox with default value
+    
     draw_bbox = st.sidebar.checkbox("Draw bounding box on the image to point out where you feel pain", value=False)
     if draw_bbox == True:
         st.sidebar.subheader("Bounding Box Parameters")
@@ -220,7 +216,6 @@ def main():
         x2 = st.sidebar.slider("X2", min_value=0, max_value=2000, value=150)
         y2 = st.sidebar.slider("Y2", min_value=0, max_value=2000, value=150)
 
-        # Define the bounding box
         bounding_box = ((x1, y1), (x2, y2))
 
     with col1:
@@ -232,42 +227,38 @@ def main():
         with col2:
             st.subheader(":blue[Modified Image]")
             if uploaded_file is not None:
-                # Modify and display the image
+                
                 if draw_bbox == True:
                     if option != "Sobel":
                         modified_image = modify_image(image, threshold, threshold2, option, draw_bbox, bounding_box)
                     else:
                         modified_image = sob(image, stype, draw_bbox, bounding_box)
-                        # st.image(modified_image, caption="Uploaded Image", use_column_width=True)
                 else:
                     if option != "Sobel":
                         modified_image = modify_image(image, threshold, threshold2, option)
                     else:
                         modified_image = sob(image, stype)
-                        # st.image(modified_image, caption="Uploaded Image", use_column_width=True)
-
-                # Use the image_zoom function to display the modified image with zoom functionality
+                        
+                
                 image_zoom(modified_image, mode="mousemove", size=512, zoom_factor=zoom_factor)
 
                 
-                        # Perform any additional processing here using bounding box coordinates
+                        
                 if draw_bbox == True:
                     if option == "Canny Edge" or option == "Morphological":
                         if st.sidebar.button("Process Bounding Box to find out if you have a fracture"):
-                            # Perform any additional processing here
-                            # For example, you can extract the region inside the bounding box
+                            
                             min_y = min(y1, y2)
                             max_y = max(y1, y2)
                             min_x = min(x1, x2)
                             max_x = max(x1, x2)
                             region_of_interest = modified_image[min_y:max_y, min_x:max_x]
     
-                                # Display the extracted region
+                                
                             st.sidebar.image(region_of_interest, caption="Extracted Region",
                                                     use_column_width=True)
                             if option == "Canny Edge":
     
-                                # model = load_req_model('https://github.com/anusha-adhikari/Preprocessing_frac_image/raw/main/vgg19.h5')
                                 model = load_req_model(1)
     
                                 img = cv2.cvtColor(region_of_interest, cv2.COLOR_GRAY2RGB)
@@ -282,8 +273,6 @@ def main():
     
                             if option == "Morphological":
     
-                                # model = load_req_model('https://github.com/anusha-adhikari/Preprocessing_frac_image/raw/main/vgg19_morph.h5')
-    
                                 model = load_req_model(2)
     
                                 img = cv2.cvtColor(region_of_interest, cv2.COLOR_GRAY2RGB)
@@ -296,25 +285,21 @@ def main():
                                 else:
                                     st.success('No fracture detected')
 
-                        if option == "Sobel":
+                    if option == "Sobel":
                             
-                            if st.sidebar.button("Process Bounding Box to see Extracted Region"):
-                            # model = load_req_model('https://github.com/anusha-adhikari/Preprocessing_frac_image/raw/main/vgg19_morph.h5')
-
-                                min_y = min(y1, y2)
-                                max_y = max(y1, y2)
-                                min_x = min(x1, x2)
-                                max_x = max(x1, x2)
-                                region_of_interest = modified_image[min_y:max_y, min_x:max_x]
+                        if st.sidebar.button("Process Bounding Box to see Extracted Region"):
+                            
+                            min_y = min(y1, y2)
+                            max_y = max(y1, y2)
+                            min_x = min(x1, x2)
+                            max_x = max(x1, x2)
+                            region_of_interest = modified_image[min_y:max_y, min_x:max_x]
         
-                                    # Display the extracted region
-                                st.sidebar.image(region_of_interest, caption="Extracted Region",
+                            st.sidebar.image(region_of_interest, caption="Extracted Region",
                                                         use_column_width=True)
                                 
-                        # Display the modified image with drawn bounding boxes
                         st.sidebar.image(modified_image, caption="Modified Image", use_column_width=True)
 
-                # Download button for modified image
                 download_button = st.button("Download Modified Image")
                 if download_button:
                     download_image(modified_image)
