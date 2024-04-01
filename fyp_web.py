@@ -9,6 +9,15 @@ from torch import nn
 import torch.nn.functional as F
 import torch
 
+@st.cache(allow_output_mutation=True)
+def load_req_model(m):
+    if m == 1:
+        model_url = "vgg19_canny1.h5"
+    if m == 2:
+        model_url = "vgg19_morph1.h5"
+        
+    model = load_model(model_url)
+    return model
 
 class Sobel(nn.Module):
     def __init__(self):
@@ -75,16 +84,6 @@ def sob(rgb_orig, stype, draw_bbox = False, bounding_box = ((0,0), (0, 0))):
         mod = draw_bounding_box(mod, bounding_box)
 
     return mod
-
-@st.cache(allow_output_mutation=True)
-def load_req_model(m):
-    if m == 1:
-        model_url = "vgg19_canny1.h5"
-    if m == 2:
-        model_url = "vgg19_morph1.h5"
-        
-    model = load_model(model_url)
-    return model
 
 def morphological_processing_with_canny(image, threshold1, threshold2):
     umat_image = cv2.UMat(image)
@@ -253,65 +252,65 @@ def main():
                 
                         # Perform any additional processing here using bounding box coordinates
                 if draw_bbox == True:
-                    if st.sidebar.button("Process Bounding Box to find out if you have a fracture"):
-                        # Perform any additional processing here
-                        # For example, you can extract the region inside the bounding box
-                        min_y = min(y1, y2)
-                        max_y = max(y1, y2)
-                        min_x = min(x1, x2)
-                        max_x = max(x1, x2)
-                        region_of_interest = modified_image[min_y:max_y, min_x:max_x]
-
-                            # Display the extracted region
-                        st.sidebar.image(region_of_interest, caption="Extracted Region",
-                                                use_column_width=True)
-                        if option == "Canny Edge":
-
-                            # model = load_req_model('https://github.com/anusha-adhikari/Preprocessing_frac_image/raw/main/vgg19.h5')
-                            model = load_req_model(1)
-
-                            img = cv2.cvtColor(region_of_interest, cv2.COLOR_GRAY2RGB)
-                            img = cv2.resize(img, (100, 100))
-                            img = img/255
-                            img = np.reshape(img, ((1,)+img.shape))
-
-                            if model.predict(img) >= 0.5:
-                                st.error('Fracture detected')
-                            else:
-                                st.success('No fracture detected')
-
-                        if option == "Morphological":
-
-                            # model = load_req_model('https://github.com/anusha-adhikari/Preprocessing_frac_image/raw/main/vgg19_morph.h5')
-
-                            model = load_req_model(2)
-
-                            img = cv2.cvtColor(region_of_interest, cv2.COLOR_GRAY2RGB)
-                            img = cv2.resize(img, (100, 100))
-                            img = img/255
-                            img = np.reshape(img, ((1,)+img.shape))
-
-                            if model.predict(img) >= 0.5:
-                                st.error('Fracture detected')
-                            else:
-                                st.success('No fracture detected')
+                    if option == "Canny Edge" or option == "Morphological":
+                        if st.sidebar.button("Process Bounding Box to find out if you have a fracture"):
+                            # Perform any additional processing here
+                            # For example, you can extract the region inside the bounding box
+                            min_y = min(y1, y2)
+                            max_y = max(y1, y2)
+                            min_x = min(x1, x2)
+                            max_x = max(x1, x2)
+                            region_of_interest = modified_image[min_y:max_y, min_x:max_x]
+    
+                                # Display the extracted region
+                            st.sidebar.image(region_of_interest, caption="Extracted Region",
+                                                    use_column_width=True)
+                            if option == "Canny Edge":
+    
+                                # model = load_req_model('https://github.com/anusha-adhikari/Preprocessing_frac_image/raw/main/vgg19.h5')
+                                model = load_req_model(1)
+    
+                                img = cv2.cvtColor(region_of_interest, cv2.COLOR_GRAY2RGB)
+                                img = cv2.resize(img, (100, 100))
+                                img = img/255
+                                img = np.reshape(img, ((1,)+img.shape))
+    
+                                if model.predict(img) >= 0.5:
+                                    st.error('Fracture detected')
+                                else:
+                                    st.success('No fracture detected')
+    
+                            if option == "Morphological":
+    
+                                # model = load_req_model('https://github.com/anusha-adhikari/Preprocessing_frac_image/raw/main/vgg19_morph.h5')
+    
+                                model = load_req_model(2)
+    
+                                img = cv2.cvtColor(region_of_interest, cv2.COLOR_GRAY2RGB)
+                                img = cv2.resize(img, (100, 100))
+                                img = img/255
+                                img = np.reshape(img, ((1,)+img.shape))
+    
+                                if model.predict(img) >= 0.5:
+                                    st.error('Fracture detected')
+                                else:
+                                    st.success('No fracture detected')
 
                         if option == "Sobel":
-
+                            
+                            if st.sidebar.button("Process Bounding Box to see Extracted Region"):
                             # model = load_req_model('https://github.com/anusha-adhikari/Preprocessing_frac_image/raw/main/vgg19_morph.h5')
 
-                            model = load_req_model(2)
-
-                            img = cv2.cvtColor(region_of_interest, cv2.COLOR_GRAY2RGB)
-                            img = cv2.resize(img, (100, 100))
-                            img = img/255
-                            img = np.reshape(img, ((1,)+img.shape))
-
-                            if model.predict(img) >= 0.5:
-                                st.error('Fracture detected')
-                            else:
-                                st.success('No fracture detected')
-                            
+                                min_y = min(y1, y2)
+                                max_y = max(y1, y2)
+                                min_x = min(x1, x2)
+                                max_x = max(x1, x2)
+                                region_of_interest = modified_image[min_y:max_y, min_x:max_x]
+        
+                                    # Display the extracted region
+                                st.sidebar.image(region_of_interest, caption="Extracted Region",
+                                                        use_column_width=True)
+                                
                         # Display the modified image with drawn bounding boxes
                         st.sidebar.image(modified_image, caption="Modified Image", use_column_width=True)
 
