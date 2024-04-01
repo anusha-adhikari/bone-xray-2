@@ -181,8 +181,8 @@ def main():
 
     option = st.sidebar.selectbox(
         "Choose:",
-        ("Edge Detection type", "Canny Edge", "Sobel", "Morphological"),
-        index=0
+        ("Edge Detection type", "Sobel", "Morphological", "Canny Edge"),
+        index = 0
     )
 
     if option is not None and option == "Edge Detection type":
@@ -211,9 +211,11 @@ def main():
     draw_bbox = st.sidebar.checkbox("Draw bounding box on the image to point out where you feel pain", value=False)
     if draw_bbox == True:
         st.sidebar.subheader("Bounding Box Parameters")
+        st.sidebar.caption("Horizontal:")
         x1 = st.sidebar.slider("X1", min_value=0, max_value=2000, value=50)
-        y1 = st.sidebar.slider("Y1", min_value=0, max_value=2000, value=50)
         x2 = st.sidebar.slider("X2", min_value=0, max_value=2000, value=150)
+        st.sidebar.caption("Vertical:")
+        y1 = st.sidebar.slider("Y1", min_value=0, max_value=2000, value=50)
         y2 = st.sidebar.slider("Y2", min_value=0, max_value=2000, value=150)
 
         bounding_box = ((x1, y1), (x2, y2))
@@ -298,7 +300,7 @@ def main():
                             st.sidebar.image(region_of_interest, caption="Extracted Region",
                                                         use_column_width=True)
                                 
-                        st.sidebar.image(modified_image, caption="Modified Image", use_column_width=True)
+                            st.sidebar.image(modified_image, caption="Modified Image", use_column_width=True)
 
                 download_button = st.button("Download Modified Image")
                 if download_button:
